@@ -43,11 +43,22 @@ export type CreditCardRecord = {
   minimum_payment: number | null;
 };
 
+export type AccountWithDetails = AccountRecord & {
+  due_amount?: number;
+  due_date?: string | null;
+  minimum_payment?: number | null;
+};
+
 function normalizeNumber(value: number | string | null | undefined) {
   return Number(value ?? 0);
 }
 
-async function runQuery<T>(query: { then: (onfulfilled: (value: { data: T[] | null; error: unknown }) => unknown, onrejected?: (reason: unknown) => unknown) => unknown }) {
+async function runQuery<T>(query: {
+  then: (
+    onfulfilled: (value: { data: T[] | null; error: unknown }) => unknown,
+    onrejected?: (reason: unknown) => unknown
+  ) => unknown;
+}) {
   const { data, error } = await query;
 
   if (error) {
@@ -57,7 +68,7 @@ async function runQuery<T>(query: { then: (onfulfilled: (value: { data: T[] | nu
   return data ?? [];
 }
 
-export async function getDashboardData() {
+async function getBaseFinanceData() {
   const client = getInsforgeClient();
 
   const [accounts, payPeriods, rules, recurringItems, creditCards] = await Promise.all([
@@ -98,6 +109,36 @@ export async function getDashboardData() {
     ),
   ]);
 
+  return {
+    accounts: accounts.map((account) => ({
+      ...account,
+      current_balance: normalizeNumber(account.current_balance),
+    })),
+    payPeriods: payPeriods.map((payPeriod) => ({
+      ...payPeriod,
+      income_amount: normalizeNumber(payPeriod.income_amount),
+      free_amount: normalizeNumber(payPeriod.free_amount),
+    })),
+    rules: rules.map((rule) => ({
+      ...rule,
+      value: normalizeNumber(rule.value),
+    })),
+    recurringItems: recurringItems.map((item) => ({
+      ...item,
+      amount: normalizeNumber(item.amount),
+    })),
+    creditCards: creditCards.map((card) => ({
+      ...card,
+      due_amount: normalizeNumber(card.due_amount),
+      minimum_payment: normalizeNumber(card.minimum_payment),
+    })),
+  };
+}
+
+export async function getDashboardData() {
+  const { accounts, payPeriods, rules, recurringItems, creditCards } =
+    await getBaseFinanceData();
+
   const currentPayPeriod = payPeriods[0] ?? null;
   const accountMap = new Map(accounts.map((account) => [account.id, account]));
 
@@ -120,7 +161,11 @@ export async function getDashboardData() {
         .filter((rule) => rule.category === 'savings')
         .reduce((sum, rule) => {
           if (rule.rule_type === 'percentage') {
-            return sum + (normalizeNumber(currentPayPeriod.income_amount) * normalizeNumber(rule.value)) / 100;
+            return (
+              sum +
+              (normalizeNumber(currentPayPeriod.income_amount) * normalizeNumber(rule.value)) /
+                100
+            );
           }
 
           return sum + normalizeNumber(rule.value);
@@ -153,13 +198,42 @@ export async function getDashboardData() {
     creditCardAmount,
     savingsAmount,
     upcomingPayments,
-    accounts: accounts.map((account) => ({
+    accounts,
+    rules,
+  };
+}
+
+export async function getAccountsPageData() {
+  const { accounts, creditCards } = await getBaseFinanceData();
+  const creditCardMap = new Map(creditCards.map((card) => [card.account_id, card]));
+
+  const accountsWithDetails: AccountWithDetails[] = accounts.map((account) => {
+    const creditCard = creditCardMap.get(account.id);
+
+    return {
       ...account,
-      current_balance: normalizeNumber(account.current_balance),
-    })),
-    rules: rules.map((rule) => ({
-      ...rule,
-      value: normalizeNumber(rule.value),
-    })),
+      due_amount: creditCard?.due_amount,
+      due_date: creditCard?.due_date ?? null,
+      minimum_payment: creditCard?.minimum_payment ?? null,
+    };
+  });
+
+  const liquidTotal = accountsWithDetails
+    .filter((account) => account.type !== 'credit')
+    .reduce((sum, account) => sum + normalizeNumber(account.current_balance), 0);
+
+  const debtTotal = accountsWithDetails
+    .filter((account) => account.type === 'credit')
+    .reduce((sum, account) => sum + Math.abs(normalizeNumber(account.current_balance)), 0);
+
+  const savingsTotal = accountsWithDetails
+    .filter((account) => account.type === 'savings')
+    .reduce((sum, account) => sum + normalizeNumber(account.current_balance), 0);
+
+  return {
+    liquidTotal,
+    debtTotal,
+    savingsTotal,
+    accounts: accountsWithDetails,
   };
 }
