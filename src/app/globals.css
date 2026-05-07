@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --bg-app: #f6f4ee;
+  --bg-surface: #fbfaf7;
+  --bg-soft: #f1eee6;
+  --border-soft: #e7e2d8;
+  --border-strong: #d7d0c2;
+  --text-strong: #2f312b;
+  --text-body: #4c4f47;
+  --text-muted: #6e7168;
+  --olive-600: #5f6d43;
+  --olive-500: #6f7c4f;
+  --olive-300: #b8c39c;
+  --olive-200: #dce3cf;
+  --olive-100: #eef2e5;
+  --danger-500: #a85e56;
+  --danger-100: #f3e3e0;
+}
+
+@theme inline {
+  --color-background: var(--bg-app);
+  --color-foreground: var(--text-strong);
+  --color-surface: var(--bg-surface);
+  --color-soft: var(--bg-soft);
+  --color-border-soft: var(--border-soft);
+  --color-border-strong: var(--border-strong);
+  --color-text-body: var(--text-body);
+  --color-text-muted: var(--text-muted);
+  --color-olive-600: var(--olive-600);
+  --color-olive-500: var(--olive-500);
+  --color-olive-300: var(--olive-300);
+  --color-olive-200: var(--olive-200);
+  --color-olive-100: var(--olive-100);
+  --color-danger-500: var(--danger-500);
+  --color-danger-100: var(--danger-100);
+  --font-sans: var(--font-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg-app);
+}
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text-strong);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: var(--olive-200);
+  color: var(--text-strong);
+}
