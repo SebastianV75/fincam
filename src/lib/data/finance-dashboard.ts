@@ -43,6 +43,15 @@ export type CreditCardRecord = {
   minimum_payment: number | null;
 };
 
+export type SavingsGoalRecord = {
+  id: string;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  target_date: string | null;
+  is_active: boolean;
+};
+
 export type AccountWithDetails = AccountRecord & {
   due_amount?: number;
   due_date?: string | null;
@@ -71,43 +80,51 @@ async function runQuery<T>(query: {
 async function getBaseFinanceData() {
   const client = getInsforgeClient();
 
-  const [accounts, payPeriods, rules, recurringItems, creditCards] = await Promise.all([
-    runQuery<AccountRecord>(
-      client.database
-        .from('accounts')
-        .select('id, name, type, current_balance')
-        .order('created_at', { ascending: true })
-    ),
-    runQuery<PayPeriodRecord>(
-      client.database
-        .from('pay_periods')
-        .select('id, label, start_date, end_date, income_amount, free_amount, income_received_at, status')
-        .eq('status', 'open')
-        .order('start_date', { ascending: false })
-        .limit(1)
-    ),
-    runQuery<AllocationRuleRecord>(
-      client.database
-        .from('allocation_rules')
-        .select('id, category, name, rule_type, value, priority_order')
-        .eq('is_active', true)
-        .order('priority_order', { ascending: true })
-    ),
-    runQuery<RecurringItemRecord>(
-      client.database
-        .from('recurring_items')
-        .select('id, name, amount, next_due_date, linked_rule_category')
-        .eq('is_active', true)
-        .order('next_due_date', { ascending: true })
-        .limit(5)
-    ),
-    runQuery<CreditCardRecord>(
-      client.database
-        .from('credit_cards')
-        .select('id, account_id, due_amount, due_date, minimum_payment')
-        .order('due_date', { ascending: true })
-    ),
-  ]);
+  const [accounts, payPeriods, rules, recurringItems, creditCards, savingsGoals] =
+    await Promise.all([
+      runQuery<AccountRecord>(
+        client.database
+          .from('accounts')
+          .select('id, name, type, current_balance')
+          .order('created_at', { ascending: true })
+      ),
+      runQuery<PayPeriodRecord>(
+        client.database
+          .from('pay_periods')
+          .select('id, label, start_date, end_date, income_amount, free_amount, income_received_at, status')
+          .eq('status', 'open')
+          .order('start_date', { ascending: false })
+          .limit(1)
+      ),
+      runQuery<AllocationRuleRecord>(
+        client.database
+          .from('allocation_rules')
+          .select('id, category, name, rule_type, value, priority_order')
+          .eq('is_active', true)
+          .order('priority_order', { ascending: true })
+      ),
+      runQuery<RecurringItemRecord>(
+        client.database
+          .from('recurring_items')
+          .select('id, name, amount, next_due_date, linked_rule_category')
+          .eq('is_active', true)
+          .order('next_due_date', { ascending: true })
+          .limit(5)
+      ),
+      runQuery<CreditCardRecord>(
+        client.database
+          .from('credit_cards')
+          .select('id, account_id, due_amount, due_date, minimum_payment')
+          .order('due_date', { ascending: true })
+      ),
+      runQuery<SavingsGoalRecord>(
+        client.database
+          .from('savings_goals')
+          .select('id, name, target_amount, current_amount, target_date, is_active')
+          .eq('is_active', true)
+          .order('created_at', { ascending: true })
+      ),
+    ]);
 
   return {
     accounts: accounts.map((account) => ({
@@ -131,6 +148,11 @@ async function getBaseFinanceData() {
       ...card,
       due_amount: normalizeNumber(card.due_amount),
       minimum_payment: normalizeNumber(card.minimum_payment),
+    })),
+    savingsGoals: savingsGoals.map((goal) => ({
+      ...goal,
+      target_amount: normalizeNumber(goal.target_amount),
+      current_amount: normalizeNumber(goal.current_amount),
     })),
   };
 }
@@ -235,5 +257,29 @@ export async function getAccountsPageData() {
     debtTotal,
     savingsTotal,
     accounts: accountsWithDetails,
+  };
+}
+
+export async function getGoalsPageData() {
+  const { savingsGoals } = await getBaseFinanceData();
+
+  const goals = savingsGoals.map((goal) => {
+    const progress = goal.target_amount > 0 ? goal.current_amount / goal.target_amount : 0;
+    const progressPercent = Math.max(0, Math.min(100, Math.round(progress * 100)));
+
+    return {
+      ...goal,
+      progressPercent,
+      remainingAmount: Math.max(0, goal.target_amount - goal.current_amount),
+    };
+  });
+
+  const totalSaved = goals.reduce((sum, goal) => sum + goal.current_amount, 0);
+  const totalTarget = goals.reduce((sum, goal) => sum + goal.target_amount, 0);
+
+  return {
+    totalSaved,
+    totalTarget,
+    goals,
   };
 }

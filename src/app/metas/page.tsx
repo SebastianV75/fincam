@@ -1,32 +1,81 @@
-import { AppShell } from "@/components/layout/app-shell";
-import { SectionCard } from "@/components/ui/section-card";
+import { AppShell } from '@/components/layout/app-shell';
+import { SectionCard } from '@/components/ui/section-card';
+import { getGoalsPageData } from '@/lib/data/finance-dashboard';
+import { formatCurrency, formatMonthYear } from '@/lib/utils/format';
 
-export default function GoalsPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function GoalsPage() {
+  const data = await getGoalsPageData();
+
   return (
     <AppShell
       activeTab="metas"
       title="Metas"
       subtitle="Ahorro simple y visible"
     >
-      <SectionCard
-        title="Fondo de emergencia"
-        actionLabel="Aportar"
-        rows={[{ label: "Progreso", value: "$6,000 / $20,000" }]}
-      >
-        <div className="mb-4 h-3 overflow-hidden rounded-full bg-soft">
-          <div className="h-full w-[30%] rounded-full bg-olive-500" />
+      <SectionCard title="Resumen de metas">
+        <p className="mb-4 text-4xl font-semibold tracking-tight text-foreground">
+          {formatCurrency(data.totalSaved)}
+        </p>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl bg-background px-4 py-3">
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-text-muted">
+              Ahorrado hoy
+            </p>
+            <p className="mt-2 text-lg font-semibold text-foreground">
+              {formatCurrency(data.totalSaved)}
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-background px-4 py-3">
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-text-muted">
+              Meta total
+            </p>
+            <p className="mt-2 text-lg font-semibold text-foreground">
+              {formatCurrency(data.totalTarget)}
+            </p>
+          </div>
         </div>
       </SectionCard>
 
-      <SectionCard
-        title="Viaje"
-        actionLabel="Aportar"
-        rows={[{ label: "Progreso", value: "$2,500 / $10,000" }]}
-      >
-        <div className="mb-4 h-3 overflow-hidden rounded-full bg-soft">
-          <div className="h-full w-[25%] rounded-full bg-olive-300" />
-        </div>
-      </SectionCard>
+      {data.goals.map((goal, index) => (
+        <SectionCard
+          key={goal.id}
+          title={goal.name}
+          actionLabel="Aportar"
+          rows={[
+            {
+              label: 'Progreso',
+              value: `${formatCurrency(goal.current_amount)} / ${formatCurrency(goal.target_amount)}`,
+            },
+            {
+              label: 'Te faltan',
+              value: formatCurrency(goal.remainingAmount),
+            },
+            {
+              label: 'Objetivo',
+              value: goal.target_date ? formatMonthYear(goal.target_date) : 'Sin fecha',
+            },
+          ]}
+        >
+          <div className="mb-4">
+            <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+              <span className="font-medium text-text-body">Avance</span>
+              <span className="text-text-muted">{goal.progressPercent}%</span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full bg-soft">
+              <div
+                className={`h-full rounded-full ${
+                  index % 2 === 0 ? 'bg-olive-500' : 'bg-olive-300'
+                }`}
+                style={{ width: `${goal.progressPercent}%` }}
+              />
+            </div>
+          </div>
+        </SectionCard>
+      ))}
     </AppShell>
   );
 }

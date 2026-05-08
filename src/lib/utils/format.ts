@@ -14,3 +14,12 @@ export function formatShortDate(value: string | Date) {
     month: 'short',
   }).format(date);
 }
+
+export function formatMonthYear(value: string | Date) {
+  const date = typeof value === 'string' ? new Date(`${value}T12:00:00`) : value;
+
+  return new Intl.DateTimeFormat('es-MX', {
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
