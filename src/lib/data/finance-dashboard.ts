@@ -31,8 +31,11 @@ export type RecurringItemRecord = {
   id: string;
   name: string;
   amount: number;
+  recurrence_type: 'weekly' | 'biweekly' | 'monthly' | 'custom';
   next_due_date: string;
+  reminder_days_before: number;
   linked_rule_category: 'fixed_expense' | 'credit_card' | 'savings' | null;
+  is_active?: boolean;
 };
 
 export type CreditCardRecord = {
@@ -106,10 +109,11 @@ async function getBaseFinanceData() {
       runQuery<RecurringItemRecord>(
         client.database
           .from('recurring_items')
-          .select('id, name, amount, next_due_date, linked_rule_category')
+          .select(
+            'id, name, amount, recurrence_type, next_due_date, reminder_days_before, linked_rule_category, is_active'
+          )
           .eq('is_active', true)
           .order('next_due_date', { ascending: true })
-          .limit(5)
       ),
       runQuery<CreditCardRecord>(
         client.database
@@ -143,6 +147,7 @@ async function getBaseFinanceData() {
     recurringItems: recurringItems.map((item) => ({
       ...item,
       amount: normalizeNumber(item.amount),
+      reminder_days_before: normalizeNumber(item.reminder_days_before),
     })),
     creditCards: creditCards.map((card) => ({
       ...card,
@@ -281,5 +286,31 @@ export async function getGoalsPageData() {
     totalSaved,
     totalTarget,
     goals,
+  };
+}
+
+export async function getRecurringPageData() {
+  const { recurringItems } = await getBaseFinanceData();
+
+  const totalRecurringAmount = recurringItems.reduce(
+    (sum, item) => sum + normalizeNumber(item.amount),
+    0
+  );
+
+  const groupedTotals = recurringItems.reduce(
+    (totals, item) => {
+      const key = item.linked_rule_category ?? 'other';
+      totals[key] = (totals[key] ?? 0) + normalizeNumber(item.amount);
+      return totals;
+    },
+    {} as Record<string, number>
+  );
+
+  return {
+    totalRecurringAmount,
+    itemsCount: recurringItems.length,
+    upcomingCount: recurringItems.filter((item) => Boolean(item.next_due_date)).length,
+    groupedTotals,
+    recurringItems,
   };
 }

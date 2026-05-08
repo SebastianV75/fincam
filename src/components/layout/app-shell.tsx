@@ -14,7 +14,7 @@ type DesktopSummary = {
 };
 
 type AppShellProps = {
-  activeTab: 'home' | 'quincena' | 'agregar' | 'cuentas' | 'metas';
+  activeTab: 'home' | 'quincena' | 'agregar' | 'recurrentes' | 'cuentas' | 'metas';
   title: string;
   subtitle: string;
   desktopSummary?: DesktopSummary;
@@ -24,7 +24,7 @@ type AppShellProps = {
 const tabs = [
   { key: 'home', label: 'Inicio', href: '/' },
   { key: 'quincena', label: 'Quincena', href: '/quincena' },
-  { key: 'agregar', label: 'Nuevo', href: '/agregar' },
+  { key: 'recurrentes', label: 'Recurrentes', href: '/recurrentes' },
   { key: 'cuentas', label: 'Cuentas', href: '/cuentas' },
   { key: 'metas', label: 'Metas', href: '/metas' },
 ] as const;
