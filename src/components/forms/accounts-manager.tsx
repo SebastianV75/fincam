@@ -5,7 +5,6 @@ import { useActionState, useState } from 'react';
 import {
   archiveAccountAction,
   createAccountAction,
-  initialAccountActionState,
   updateAccountAction,
 } from '@/app/cuentas/actions';
 
@@ -27,6 +26,8 @@ type ActionState = {
   status: 'idle' | 'success' | 'error';
   message?: string;
 };
+
+const initialAccountActionState: ActionState = { status: 'idle' };
 
 const accountTypeOptions = [
   { value: 'debit', label: 'Debito' },

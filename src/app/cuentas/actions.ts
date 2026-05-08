@@ -9,7 +9,6 @@ type ActionState = {
   message?: string;
 };
 
-export const initialAccountActionState: ActionState = { status: 'idle' };
 
 type AccountType = 'debit' | 'credit' | 'cash' | 'savings';
 
