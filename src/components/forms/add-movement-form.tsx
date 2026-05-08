@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useActionState, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { createMovementAction } from '@/app/agregar/actions';
 
@@ -102,6 +103,7 @@ export function AddMovementForm({
     createMovementAction,
     initialState
   );
+  const [feedback, setFeedback] = useState<ActionState>(initialState);
   const [movementType, setMovementType] = useState<
     (typeof movementTypes)[number]['value']
   >('expense');
@@ -112,6 +114,41 @@ export function AddMovementForm({
   const [selectedAccountId, setSelectedAccountId] = useState('');
   const [selectedDestinationAccountId, setSelectedDestinationAccountId] =
     useState('');
+
+  const resetDraft = useCallback((options?: { resetDate?: boolean }) => {
+    setAmount('');
+    setNote('');
+    setSelectedCategoryId('');
+    setSelectedAccountId('');
+    setSelectedDestinationAccountId('');
+
+    if (options?.resetDate) {
+      setTransactionDate(defaultDate);
+    }
+  }, [defaultDate]);
+
+  useEffect(() => {
+    if (state.status === 'idle' || !state.message) {
+      return;
+    }
+
+    const syncId = window.setTimeout(() => {
+      setFeedback(state);
+
+      if (state.status === 'success') {
+        resetDraft();
+      }
+    }, 0);
+
+    const timeoutId = window.setTimeout(() => {
+      setFeedback(initialState);
+    }, state.status === 'success' ? 3000 : 4500);
+
+    return () => {
+      window.clearTimeout(syncId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [resetDraft, state]);
 
   const filteredCategories = useMemo(() => {
     return categories.filter((category) => category.kind === movementType);
@@ -164,6 +201,18 @@ export function AddMovementForm({
     (movementType !== 'transfer' && filteredCategories.length === 0) ||
     (movementType === 'transfer' && destinationAccounts.length === 0);
 
+  const handleMovementTypeChange = (
+    nextType: (typeof movementTypes)[number]['value']
+  ) => {
+    if (nextType === movementType) {
+      return;
+    }
+
+    setMovementType(nextType);
+    setFeedback(initialState);
+    resetDraft();
+  };
+
   return (
     <form
       action={formAction}
@@ -177,9 +226,17 @@ export function AddMovementForm({
               {selectedTypeCopy.description}
             </p>
           </div>
-          <span className="rounded-full bg-olive-100 px-3 py-1 text-xs font-medium text-olive-600">
-            Rapido
-          </span>
+          <div className="flex flex-col items-end gap-2">
+            <span className="rounded-full bg-olive-100 px-3 py-1 text-xs font-medium text-olive-600">
+              Rapido
+            </span>
+            <Link
+              href="/"
+              className="rounded-full border border-border-soft bg-surface px-3 py-1 text-xs font-medium text-text-body transition-colors hover:bg-soft"
+            >
+              Volver a Home
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -191,7 +248,7 @@ export function AddMovementForm({
             <button
               key={type.value}
               type="button"
-              onClick={() => setMovementType(type.value)}
+              onClick={() => handleMovementTypeChange(type.value)}
               className={`rounded-2xl border px-4 py-3 text-sm font-medium transition-colors ${
                 isActive
                   ? 'border-olive-500 bg-olive-500 text-white'
@@ -379,25 +436,52 @@ export function AddMovementForm({
           </p>
         ) : null}
 
-        {state.message ? (
-          <p
+        {feedback.message ? (
+          <div
             className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
-              state.status === 'success'
+              feedback.status === 'success'
                 ? 'bg-olive-100 text-olive-600'
                 : 'bg-danger-100 text-danger-500'
             }`}
           >
-            {state.message}
-          </p>
+            <p>{feedback.message}</p>
+
+            {feedback.status === 'success' ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFeedback(initialState)}
+                  className="rounded-full border border-olive-300 px-3 py-1 text-xs font-medium text-olive-600 transition-colors hover:bg-white/60"
+                >
+                  Seguir capturando
+                </button>
+                <Link
+                  href="/"
+                  className="rounded-full border border-olive-300 px-3 py-1 text-xs font-medium text-olive-600 transition-colors hover:bg-white/60"
+                >
+                  Ir a Home
+                </Link>
+              </div>
+            ) : null}
+          </div>
         ) : null}
 
-        <button
-          type="submit"
-          disabled={isDisabled}
-          className="h-12 w-full rounded-2xl bg-olive-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-olive-600 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          {pending ? 'Guardando...' : 'Guardar movimiento'}
-        </button>
+        <div className="space-y-3">
+          <button
+            type="submit"
+            disabled={isDisabled}
+            className="h-12 w-full rounded-2xl bg-olive-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-olive-600 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {pending ? 'Guardando...' : 'Guardar movimiento'}
+          </button>
+
+          <Link
+            href="/"
+            className="flex h-12 w-full items-center justify-center rounded-2xl border border-border-soft bg-background px-4 text-sm font-medium text-text-body transition-colors hover:bg-soft"
+          >
+            Terminar y volver a Home
+          </Link>
+        </div>
       </div>
     </form>
   );
