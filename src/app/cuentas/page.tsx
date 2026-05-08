@@ -1,25 +1,11 @@
 import Link from 'next/link';
 
+import { AccountsManager } from '@/components/forms/accounts-manager';
 import { AppShell } from '@/components/layout/app-shell';
-import { SectionCard } from '@/components/ui/section-card';
 import { getAccountsPageData } from '@/lib/data/finance-dashboard';
-import { formatCurrency, formatShortDate } from '@/lib/utils/format';
+import { formatCurrency } from '@/lib/utils/format';
 
 export const dynamic = 'force-dynamic';
-
-const accountTypeLabel = {
-  debit: 'Debito',
-  credit: 'Credito',
-  cash: 'Efectivo',
-  savings: 'Ahorro',
-} as const;
-
-const accountTypeDescription = {
-  debit: 'Tu flujo principal para uso diario.',
-  credit: 'Cuenta ligada a deuda y fecha limite.',
-  cash: 'Dinero disponible fuera del banco.',
-  savings: 'Apartado para metas o reserva.',
-} as const;
 
 export default async function AccountsPage() {
   const data = await getAccountsPageData();
@@ -100,56 +86,15 @@ export default async function AccountsPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
-        {data.accounts.map((account) => (
-          <SectionCard
-            key={account.id}
-            title={account.name}
-            rows={[
-              {
-                label: 'Tipo de cuenta',
-                meta: accountTypeDescription[account.type],
-                value: accountTypeLabel[account.type],
-              },
-              {
-                label: 'Saldo actual',
-                value: formatCurrency(account.current_balance),
-                tone: account.type === 'credit' ? 'danger' : 'default',
-              },
-              ...(account.type === 'credit'
-                ? [
-                    {
-                      label: 'Debes hoy',
-                      value: formatCurrency(account.due_amount ?? 0),
-                      tone: 'danger' as const,
-                    },
-                    {
-                      label: 'Fecha limite',
-                      value: account.due_date ? formatShortDate(account.due_date) : 'Sin fecha',
-                    },
-                    {
-                      label: 'Pago minimo',
-                      value: formatCurrency(account.minimum_payment ?? 0),
-                    },
-                  ]
-                : []),
-            ]}
-          >
-            <div className="mb-4 rounded-2xl bg-background px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.12em] text-text-muted">
-                {account.type === 'credit' ? 'Saldo comprometido' : 'Saldo disponible'}
-              </p>
-              <p
-                className={`mt-2 text-2xl font-semibold ${
-                  account.type === 'credit' ? 'text-danger-500' : 'text-foreground'
-                }`}
-              >
-                {formatCurrency(account.current_balance)}
-              </p>
-            </div>
-          </SectionCard>
-        ))}
+      <section className="rounded-[24px] border border-border-soft bg-surface p-5 shadow-[0_1px_2px_rgba(47,49,43,0.04),0_8px_24px_rgba(47,49,43,0.03)]">
+        <p className="text-base font-semibold text-foreground">Administrar cuentas</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
+          Aqui ya puedes crear, renombrar, ajustar y archivar cuentas. Para tu caso, por ejemplo,
+          puedes cambiar la TDC de Banamex a BBVA sin perder la base del producto.
+        </p>
       </section>
+
+      <AccountsManager accounts={data.accounts} />
     </AppShell>
   );
 }

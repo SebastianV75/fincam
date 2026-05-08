@@ -89,6 +89,7 @@ async function getBaseFinanceData() {
         client.database
           .from('accounts')
           .select('id, name, type, current_balance')
+          .eq('is_active', true)
           .order('created_at', { ascending: true })
       ),
       runQuery<PayPeriodRecord>(
