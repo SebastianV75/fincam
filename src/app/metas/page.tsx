@@ -1,11 +1,18 @@
 import Link from 'next/link';
 
+import { GoalsManager } from '@/components/forms/goals-manager';
 import { AppShell } from '@/components/layout/app-shell';
-import { SectionCard } from '@/components/ui/section-card';
 import { getGoalsPageData } from '@/lib/data/finance-dashboard';
-import { formatCurrency, formatMonthYear } from '@/lib/utils/format';
+import { formatCurrency } from '@/lib/utils/format';
 
 export const dynamic = 'force-dynamic';
+
+function getTodayDateString() {
+  const today = new Date();
+  const offset = today.getTimezoneOffset();
+  const localDate = new Date(today.getTime() - offset * 60_000);
+  return localDate.toISOString().slice(0, 10);
+}
 
 export default async function GoalsPage() {
   const data = await getGoalsPageData();
@@ -89,47 +96,14 @@ export default async function GoalsPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
-        {data.goals.map((goal, index) => (
-          <SectionCard
-            key={goal.id}
-            title={goal.name}
-            rows={[
-              {
-                label: 'Avance actual',
-                value: `${formatCurrency(goal.current_amount)} / ${formatCurrency(goal.target_amount)}`,
-              },
-              {
-                label: 'Te faltan',
-                value: formatCurrency(goal.remainingAmount),
-              },
-              {
-                label: 'Objetivo',
-                value: goal.target_date ? formatMonthYear(goal.target_date) : 'Sin fecha',
-              },
-            ]}
-          >
-            <div className="mb-4 rounded-2xl bg-background px-4 py-4">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-medium text-text-body">Avance</span>
-                <span className="text-text-muted">{goal.progressPercent}%</span>
-              </div>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-soft">
-                <div
-                  className={`h-full rounded-full ${index % 2 === 0 ? 'bg-olive-500' : 'bg-olive-300'}`}
-                  style={{ width: `${goal.progressPercent}%` }}
-                />
-              </div>
-            </div>
-
-            <p className="mb-4 text-sm leading-6 text-text-muted">
-              {goal.remainingAmount > 0
-                ? `Vas avanzando bien. Todavia faltan ${formatCurrency(goal.remainingAmount)} para llegar a esta meta.`
-                : 'Esta meta ya llego a su objetivo. Buen trabajo.'}
-            </p>
-          </SectionCard>
-        ))}
+      <section className="rounded-[24px] border border-border-soft bg-surface p-5 shadow-[0_1px_2px_rgba(47,49,43,0.04),0_8px_24px_rgba(47,49,43,0.03)]">
+        <p className="text-base font-semibold text-foreground">Administrar metas</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
+          Aqui ya puedes crear metas nuevas, ajustar objetivos, registrar aportes manuales y archivar las que ya no quieras seguir viendo activas.
+        </p>
       </section>
+
+      <GoalsManager goals={data.goals} defaultDate={getTodayDateString()} />
     </AppShell>
   );
 }
