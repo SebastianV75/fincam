@@ -1,25 +1,51 @@
-import Link from "next/link";
-import type { ReactNode } from "react";
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+
+type DesktopSummaryStat = {
+  label: string;
+  value: string;
+  tone?: 'default' | 'danger' | 'accent';
+};
+
+type DesktopSummary = {
+  title?: string;
+  stats?: DesktopSummaryStat[];
+  note?: string;
+};
 
 type AppShellProps = {
-  activeTab: "home" | "quincena" | "agregar" | "cuentas" | "metas";
+  activeTab: 'home' | 'quincena' | 'agregar' | 'cuentas' | 'metas';
   title: string;
   subtitle: string;
+  desktopSummary?: DesktopSummary;
   children: ReactNode;
 };
 
 const tabs = [
-  { key: "home", label: "Home", href: "/" },
-  { key: "quincena", label: "Quincena", href: "/quincena" },
-  { key: "agregar", label: "Agregar", href: "/agregar" },
-  { key: "cuentas", label: "Cuentas", href: "/cuentas" },
-  { key: "metas", label: "Metas", href: "/metas" },
+  { key: 'home', label: 'Home', href: '/' },
+  { key: 'quincena', label: 'Quincena', href: '/quincena' },
+  { key: 'agregar', label: 'Agregar', href: '/agregar' },
+  { key: 'cuentas', label: 'Cuentas', href: '/cuentas' },
+  { key: 'metas', label: 'Metas', href: '/metas' },
 ] as const;
+
+function toneClasses(tone: DesktopSummaryStat['tone']) {
+  if (tone === 'danger') {
+    return 'text-danger-500';
+  }
+
+  if (tone === 'accent') {
+    return 'text-olive-600';
+  }
+
+  return 'text-foreground';
+}
 
 export function AppShell({
   activeTab,
   title,
   subtitle,
+  desktopSummary,
   children,
 }: AppShellProps) {
   return (
@@ -37,26 +63,24 @@ export function AppShell({
           <section className="space-y-4">{children}</section>
 
           <aside className="hidden rounded-[24px] border border-border-soft bg-surface p-5 shadow-[0_1px_2px_rgba(47,49,43,0.04),0_8px_24px_rgba(47,49,43,0.03)] md:block">
-            <p className="text-sm font-medium text-text-muted">Vista rápida</p>
+            <p className="text-sm font-medium text-text-muted">
+              {desktopSummary?.title ?? 'Vista rápida'}
+            </p>
             <div className="mt-4 space-y-4">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-text-muted">
-                  Disponible
-                </p>
-                <p className="mt-1 text-2xl font-semibold text-foreground">
-                  $12,450
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-text-muted">
-                  Libre de quincena
-                </p>
-                <p className="mt-1 text-xl font-semibold text-foreground">
-                  $1,750
-                </p>
-              </div>
+              {(desktopSummary?.stats ?? []).map((stat) => (
+                <div key={`${stat.label}-${stat.value}`}>
+                  <p className="text-xs font-medium uppercase tracking-[0.12em] text-text-muted">
+                    {stat.label}
+                  </p>
+                  <p className={`mt-1 text-2xl font-semibold ${toneClasses(stat.tone)}`}>
+                    {stat.value}
+                  </p>
+                </div>
+              ))}
+
               <div className="rounded-2xl bg-olive-100 px-4 py-3 text-sm leading-6 text-olive-600">
-                Base visual lista para conectar con datos reales de InsForge.
+                {desktopSummary?.note ??
+                  'Base visual lista para conectar con datos reales de InsForge.'}
               </div>
             </div>
           </aside>
@@ -74,8 +98,8 @@ export function AppShell({
                   href={tab.href}
                   className={`flex min-h-12 items-center justify-center rounded-2xl px-2 text-center text-xs font-medium transition-colors ${
                     isActive
-                      ? "bg-olive-500 text-white"
-                      : "bg-background text-text-muted hover:bg-soft hover:text-foreground"
+                      ? 'bg-olive-500 text-white'
+                      : 'bg-background text-text-muted hover:bg-soft hover:text-foreground'
                   }`}
                 >
                   {tab.label}

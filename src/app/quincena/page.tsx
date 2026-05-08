@@ -18,6 +18,18 @@ export default async function PayPeriodPage() {
           ? `${formatShortDate(currentPayPeriod.start_date)} - ${formatShortDate(currentPayPeriod.end_date)}`
           : 'Sin quincena activa'
       }
+      desktopSummary={{
+        title: 'Quincena actual',
+        stats: [
+          {
+            label: 'Ingreso',
+            value: formatCurrency(currentPayPeriod?.income_amount ?? 0),
+            tone: 'accent',
+          },
+          { label: 'Libre', value: formatCurrency(data.availableBalance) },
+        ],
+        note: 'Aqui se ve como se reparte tu ingreso entre obligaciones, ahorro y libre.',
+      }}
     >
       <SectionCard title="Ingreso recibido">
         <p className="text-4xl font-semibold tracking-tight text-foreground">
@@ -26,12 +38,12 @@ export default async function PayPeriodPage() {
         <p className="mt-2 text-sm text-text-muted">
           {currentPayPeriod?.income_received_at
             ? `Depositado el ${formatShortDate(currentPayPeriod.income_received_at)}`
-            : 'Aún sin fecha de depósito'}
+            : 'Aun sin fecha de deposito'}
         </p>
       </SectionCard>
 
       <SectionCard
-        title="Orden automático"
+        title="Orden automatico"
         rows={[
           { label: '1. Pagos fijos', value: '' },
           { label: '2. TDC', value: '' },
@@ -41,7 +53,7 @@ export default async function PayPeriodPage() {
       />
 
       <SectionCard
-        title="Distribución"
+        title="Distribucion"
         actionLabel="Ajustar"
         rows={[
           { label: 'Pagos fijos', value: formatCurrency(data.fixedExpensesAmount) },
@@ -74,9 +86,7 @@ export default async function PayPeriodPage() {
       />
 
       <SectionCard title="Resultado">
-        <p className="text-sm font-medium text-text-muted">
-          Dinero libre para esta quincena
-        </p>
+        <p className="text-sm font-medium text-text-muted">Dinero libre para esta quincena</p>
         <p className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
           {formatCurrency(data.availableBalance)}
         </p>

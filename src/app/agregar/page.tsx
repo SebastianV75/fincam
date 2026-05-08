@@ -22,7 +22,7 @@ async function getAddMovementFormData() {
     ]);
 
   if (categoriesError) {
-    throw new Error(categoriesError.message ?? 'No se pudieron cargar las categorías.');
+    throw new Error(categoriesError.message ?? 'No se pudieron cargar las categorias.');
   }
 
   if (accountsError) {
@@ -49,7 +49,15 @@ export default async function AddMovementPage() {
     <AppShell
       activeTab="agregar"
       title="Nuevo movimiento"
-      subtitle="Captura rápida para el día a día"
+      subtitle="Captura rapida para el dia a dia"
+      desktopSummary={{
+        title: 'Captura',
+        stats: [
+          { label: 'Cuentas activas', value: String(accounts.length), tone: 'accent' },
+          { label: 'Categorias', value: String(categories.length) },
+        ],
+        note: 'Este flujo ya escribe en InsForge. La prioridad aqui es rapidez y claridad.',
+      }}
     >
       <AddMovementForm
         categories={categories}

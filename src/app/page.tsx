@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { AppShell } from '@/components/layout/app-shell';
 import { SectionCard } from '@/components/ui/section-card';
 import { getDashboardData } from '@/lib/data/finance-dashboard';
@@ -10,7 +12,22 @@ export default async function Home() {
   const currentPayPeriod = data.currentPayPeriod;
 
   return (
-    <AppShell activeTab="home" title="Hola, Camil" subtitle="Tu dinero hoy">
+    <AppShell
+      activeTab="home"
+      title="Hola, Camil"
+      subtitle="Tu dinero hoy"
+      desktopSummary={{
+        title: 'Hoy',
+        stats: [
+          { label: 'Disponible', value: formatCurrency(data.availableBalance), tone: 'accent' },
+          {
+            label: 'Libre de quincena',
+            value: formatCurrency(currentPayPeriod?.free_amount ?? data.availableBalance),
+          },
+        ],
+        note: 'Tu panel principal ya esta conectado a datos reales. Lo importante aparece primero.',
+      }}
+    >
       <section className="rounded-[24px] border border-border-soft bg-surface p-5 shadow-[0_1px_2px_rgba(47,49,43,0.04),0_8px_24px_rgba(47,49,43,0.03)]">
         <p className="text-sm font-medium text-text-muted">Tu dinero disponible</p>
         <div className="mt-4 flex items-end justify-between gap-4">
@@ -19,8 +36,7 @@ export default async function Home() {
               {formatCurrency(data.availableBalance)}
             </h1>
             <p className="mt-2 max-w-xs text-sm leading-6 text-text-muted">
-              Lo que puedes usar sin afectar lo que ya apartaste para tu
-              quincena.
+              Lo que puedes usar sin afectar lo que ya apartaste para tu quincena.
             </p>
           </div>
           <span className="rounded-full bg-olive-100 px-3 py-1 text-xs font-medium text-olive-600">
@@ -30,22 +46,37 @@ export default async function Home() {
       </section>
 
       <section className="grid grid-cols-2 gap-3">
-        <button className="rounded-2xl bg-olive-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-olive-600">
+        <Link
+          href="/agregar"
+          className="flex items-center justify-center rounded-2xl bg-olive-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-olive-600"
+        >
           Registrar gasto
-        </button>
-        <button className="rounded-2xl border border-border-soft bg-surface px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-soft">
+        </Link>
+        <Link
+          href="/agregar"
+          className="flex items-center justify-center rounded-2xl border border-border-soft bg-surface px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-soft"
+        >
           Registrar abono
-        </button>
+        </Link>
       </section>
 
       <SectionCard
         title="Quincena actual"
         actionLabel="Ver plan"
-        rows={currentPayPeriod ? [
-          { label: 'Ingreso', value: formatCurrency(currentPayPeriod.income_amount) },
-          { label: 'Asignado', value: formatCurrency(currentPayPeriod.income_amount - currentPayPeriod.free_amount) },
-          { label: 'Libre restante', value: formatCurrency(currentPayPeriod.free_amount) },
-        ] : []}
+        rows={
+          currentPayPeriod
+            ? [
+                { label: 'Ingreso', value: formatCurrency(currentPayPeriod.income_amount) },
+                {
+                  label: 'Asignado',
+                  value: formatCurrency(
+                    currentPayPeriod.income_amount - currentPayPeriod.free_amount
+                  ),
+                },
+                { label: 'Libre restante', value: formatCurrency(currentPayPeriod.free_amount) },
+              ]
+            : []
+        }
       >
         <p className="mb-4 text-sm text-text-muted">
           {currentPayPeriod

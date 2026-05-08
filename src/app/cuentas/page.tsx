@@ -20,6 +20,14 @@ export default async function AccountsPage() {
       activeTab="cuentas"
       title="Cuentas"
       subtitle="Resumen rapido de todas tus cuentas"
+      desktopSummary={{
+        title: 'Balances',
+        stats: [
+          { label: 'Liquido', value: formatCurrency(data.liquidTotal), tone: 'accent' },
+          { label: 'Deuda TDC', value: formatCurrency(data.debtTotal), tone: 'danger' },
+        ],
+        note: 'Aqui puedes ver rapido cuanto tienes, cuanto esta en ahorro y cuanto debes en tarjeta.',
+      }}
     >
       <SectionCard title="Resumen total">
         <p className="mb-4 text-4xl font-semibold tracking-tight text-foreground">
@@ -79,9 +87,7 @@ export default async function AccountsPage() {
                   },
                   {
                     label: 'Fecha limite',
-                    value: account.due_date
-                      ? formatShortDate(account.due_date)
-                      : 'Sin fecha',
+                    value: account.due_date ? formatShortDate(account.due_date) : 'Sin fecha',
                   },
                   {
                     label: 'Pago minimo',

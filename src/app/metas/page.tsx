@@ -13,6 +13,14 @@ export default async function GoalsPage() {
       activeTab="metas"
       title="Metas"
       subtitle="Ahorro simple y visible"
+      desktopSummary={{
+        title: 'Ahorro',
+        stats: [
+          { label: 'Guardado', value: formatCurrency(data.totalSaved), tone: 'accent' },
+          { label: 'Objetivo total', value: formatCurrency(data.totalTarget) },
+        ],
+        note: 'Tus metas ya muestran avance real. La siguiente capa natural sera poder aportar desde aqui.',
+      }}
     >
       <SectionCard title="Resumen de metas">
         <p className="mb-4 text-4xl font-semibold tracking-tight text-foreground">
@@ -67,9 +75,7 @@ export default async function GoalsPage() {
             </div>
             <div className="h-3 overflow-hidden rounded-full bg-soft">
               <div
-                className={`h-full rounded-full ${
-                  index % 2 === 0 ? 'bg-olive-500' : 'bg-olive-300'
-                }`}
+                className={`h-full rounded-full ${index % 2 === 0 ? 'bg-olive-500' : 'bg-olive-300'}`}
                 style={{ width: `${goal.progressPercent}%` }}
               />
             </div>
