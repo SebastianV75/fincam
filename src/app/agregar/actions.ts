@@ -9,7 +9,6 @@ type ActionState = {
   message?: string;
 };
 
-const initialState: ActionState = { status: 'idle' };
 
 function asNumber(value: number | string | null | undefined) {
   return Number(value ?? 0);
@@ -285,4 +284,3 @@ export async function createMovementAction(
   }
 }
 
-export { initialState };

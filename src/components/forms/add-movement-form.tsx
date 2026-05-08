@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from 'react';
 
-import { createMovementAction, initialState } from '@/app/agregar/actions';
+import { createMovementAction } from '@/app/agregar/actions';
 
 type CategoryOption = {
   id: string;
@@ -15,6 +15,13 @@ type AccountOption = {
   name: string;
   type: 'debit' | 'credit' | 'cash' | 'savings';
 };
+
+type ActionState = {
+  status: 'idle' | 'success' | 'error';
+  message?: string;
+};
+
+const initialState: ActionState = { status: 'idle' };
 
 type AddMovementFormProps = {
   categories: CategoryOption[];
