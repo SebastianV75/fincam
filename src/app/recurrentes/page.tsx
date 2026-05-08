@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { RecurringManager } from '@/components/forms/recurring-manager';
 import { AppShell } from '@/components/layout/app-shell';
 import { SectionCard } from '@/components/ui/section-card';
 import { getRecurringPageData } from '@/lib/data/finance-dashboard';
@@ -122,50 +123,14 @@ export default async function RecurringPage() {
         </p>
       </SectionCard>
 
-      <section className="grid gap-4 md:grid-cols-2">
-        {data.recurringItems.map((item) => (
-          <SectionCard
-            key={item.id}
-            title={item.name}
-            rows={[
-              {
-                label: 'Monto',
-                value: formatCurrency(item.amount),
-              },
-              {
-                label: 'Frecuencia',
-                value: recurrenceLabel[item.recurrence_type],
-              },
-              {
-                label: 'Proximo cargo',
-                value: formatShortDate(item.next_due_date),
-              },
-              {
-                label: 'Recordatorio',
-                value:
-                  item.reminder_days_before > 0
-                    ? `${item.reminder_days_before} dias antes`
-                    : 'El mismo dia',
-              },
-              {
-                label: 'Categoria',
-                value: categoryLabel[item.linked_rule_category ?? 'other'],
-              },
-            ]}
-          >
-            <div className="mb-4 rounded-2xl bg-background px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.12em] text-text-muted">Lectura rapida</p>
-              <p className="mt-2 text-sm leading-6 text-text-body">
-                {item.linked_rule_category === 'savings'
-                  ? 'Este recurrente funciona como apartado de ahorro dentro de tu sistema.'
-                  : item.linked_rule_category === 'credit_card'
-                    ? 'Este recurrente te ayuda a no perder de vista un compromiso de tarjeta.'
-                    : 'Este recurrente forma parte de tus gastos o apartados previsibles.'}
-              </p>
-            </div>
-          </SectionCard>
-        ))}
+      <section className="rounded-[24px] border border-border-soft bg-surface p-5 shadow-[0_1px_2px_rgba(47,49,43,0.04),0_8px_24px_rgba(47,49,43,0.03)]">
+        <p className="text-base font-semibold text-foreground">Administrar recurrentes</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
+          Aqui ya puedes crear, editar y archivar tus pagos o apartados recurrentes para mantener la planeacion viva.
+        </p>
       </section>
+
+      <RecurringManager recurringItems={data.recurringItems} />
     </AppShell>
   );
 }
