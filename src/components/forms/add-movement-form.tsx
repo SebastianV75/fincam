@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { createMovementAction } from '@/app/agregar/actions';
@@ -99,6 +99,7 @@ export function AddMovementForm({
   accounts,
   defaultDate,
 }: AddMovementFormProps) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     createMovementAction,
     initialState
@@ -140,15 +141,26 @@ export function AddMovementForm({
       }
     }, 0);
 
-    const timeoutId = window.setTimeout(() => {
+    const clearId = window.setTimeout(() => {
       setFeedback(initialState);
-    }, state.status === 'success' ? 3000 : 4500);
+    }, state.status === 'success' ? 2000 : 4500);
+
+    const redirectId =
+      state.status === 'success'
+        ? window.setTimeout(() => {
+            router.push('/');
+            router.refresh();
+          }, 900)
+        : null;
 
     return () => {
       window.clearTimeout(syncId);
-      window.clearTimeout(timeoutId);
+      window.clearTimeout(clearId);
+      if (redirectId) {
+        window.clearTimeout(redirectId);
+      }
     };
-  }, [resetDraft, state]);
+  }, [resetDraft, router, state]);
 
   const filteredCategories = useMemo(() => {
     return categories.filter((category) => category.kind === movementType);
@@ -226,17 +238,9 @@ export function AddMovementForm({
               {selectedTypeCopy.description}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <span className="rounded-full bg-olive-100 px-3 py-1 text-xs font-medium text-olive-600">
-              Rapido
-            </span>
-            <Link
-              href="/"
-              className="rounded-full border border-border-soft bg-surface px-3 py-1 text-xs font-medium text-text-body transition-colors hover:bg-soft"
-            >
-              Volver a Home
-            </Link>
-          </div>
+          <span className="rounded-full bg-olive-100 px-3 py-1 text-xs font-medium text-olive-600">
+            Rapido
+          </span>
         </div>
       </div>
 
@@ -431,8 +435,7 @@ export function AddMovementForm({
 
         {movementType === 'credit_payment' ? (
           <p className="rounded-2xl bg-olive-100 px-4 py-3 text-sm leading-6 text-olive-600">
-            El abono se aplicara a la tarjeta de credito activa registrada en el
-            backend.
+            El abono se aplicara a la tarjeta de credito activa registrada en el backend.
           </p>
         ) : null}
 
@@ -444,44 +447,21 @@ export function AddMovementForm({
                 : 'bg-danger-100 text-danger-500'
             }`}
           >
-            <p>{feedback.message}</p>
-
-            {feedback.status === 'success' ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFeedback(initialState)}
-                  className="rounded-full border border-olive-300 px-3 py-1 text-xs font-medium text-olive-600 transition-colors hover:bg-white/60"
-                >
-                  Seguir capturando
-                </button>
-                <Link
-                  href="/"
-                  className="rounded-full border border-olive-300 px-3 py-1 text-xs font-medium text-olive-600 transition-colors hover:bg-white/60"
-                >
-                  Ir a Home
-                </Link>
-              </div>
-            ) : null}
+            <p>
+              {feedback.status === 'success'
+                ? 'Movimiento guardado. Volviendo a Inicio...'
+                : feedback.message}
+            </p>
           </div>
         ) : null}
 
-        <div className="space-y-3">
-          <button
-            type="submit"
-            disabled={isDisabled}
-            className="h-12 w-full rounded-2xl bg-olive-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-olive-600 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {pending ? 'Guardando...' : 'Guardar movimiento'}
-          </button>
-
-          <Link
-            href="/"
-            className="flex h-12 w-full items-center justify-center rounded-2xl border border-border-soft bg-background px-4 text-sm font-medium text-text-body transition-colors hover:bg-soft"
-          >
-            Terminar y volver a Home
-          </Link>
-        </div>
+        <button
+          type="submit"
+          disabled={isDisabled}
+          className="h-12 w-full rounded-2xl bg-olive-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-olive-600 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {pending ? 'Guardando...' : 'Guardar movimiento'}
+        </button>
       </div>
     </form>
   );

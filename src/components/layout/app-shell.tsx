@@ -14,7 +14,7 @@ type DesktopSummary = {
 };
 
 type AppShellProps = {
-  activeTab: 'home' | 'quincena' | 'agregar' | 'recurrentes' | 'cuentas' | 'metas';
+  activeTab: 'home' | 'agregar' | 'quincena' | 'mas';
   title: string;
   subtitle: string;
   desktopSummary?: DesktopSummary;
@@ -23,10 +23,9 @@ type AppShellProps = {
 
 const tabs = [
   { key: 'home', label: 'Inicio', href: '/' },
+  { key: 'agregar', label: 'Agregar', href: '/agregar' },
   { key: 'quincena', label: 'Quincena', href: '/quincena' },
-  { key: 'recurrentes', label: 'Recurrentes', href: '/recurrentes' },
-  { key: 'cuentas', label: 'Cuentas', href: '/cuentas' },
-  { key: 'metas', label: 'Metas', href: '/metas' },
+  { key: 'mas', label: 'Mas', href: '/mas' },
 ] as const;
 
 function toneClasses(tone: DesktopSummaryStat['tone']) {
@@ -59,13 +58,6 @@ export function AppShell({
             >
               <span className="inline-block h-2.5 w-2.5 rounded-full bg-olive-500" />
               Fincam
-            </Link>
-
-            <Link
-              href="/agregar"
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-olive-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-olive-600"
-            >
-              Nuevo movimiento
             </Link>
           </div>
 
@@ -129,7 +121,7 @@ export function AppShell({
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 border-t border-border-soft bg-surface/95 px-3 py-3 backdrop-blur md:hidden">
-        <ul className="mx-auto grid max-w-md grid-cols-5 gap-2">
+        <ul className="mx-auto grid max-w-md grid-cols-4 gap-2">
           {tabs.map((tab) => {
             const isActive = tab.key === activeTab;
 

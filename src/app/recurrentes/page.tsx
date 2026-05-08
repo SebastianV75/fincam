@@ -30,7 +30,7 @@ export default async function RecurringPage() {
 
   return (
     <AppShell
-      activeTab="recurrentes"
+      activeTab="mas"
       title="Recurrentes"
       subtitle="Tus pagos y apartados que vuelven cada semana, quincena o mes."
       desktopSummary={{

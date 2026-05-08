@@ -14,7 +14,7 @@ export default async function GoalsPage() {
 
   return (
     <AppShell
-      activeTab="metas"
+      activeTab="mas"
       title="Metas"
       subtitle="Tu ahorro visible, tranquilo y facil de seguir con el tiempo."
       desktopSummary={{

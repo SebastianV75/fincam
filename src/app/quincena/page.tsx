@@ -108,24 +108,18 @@ export default async function PayPeriodPage() {
           </div>
         </div>
 
-        <div className="grid gap-3 px-5 py-4 sm:grid-cols-3">
+        <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/agregar"
-            className="flex items-center justify-center rounded-2xl bg-olive-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-olive-600"
+            className="flex min-h-12 items-center justify-center rounded-2xl bg-olive-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-olive-600 sm:min-w-[220px]"
           >
             Registrar movimiento
           </Link>
           <Link
             href="/"
-            className="flex items-center justify-center rounded-2xl border border-border-soft bg-background px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-soft"
+            className="text-sm font-medium text-olive-600 transition-colors hover:text-olive-500"
           >
-            Volver a Home
-          </Link>
-          <Link
-            href="/cuentas"
-            className="flex items-center justify-center rounded-2xl border border-border-soft bg-background px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-soft"
-          >
-            Revisar cuentas
+            Volver a Inicio
           </Link>
         </div>
       </section>

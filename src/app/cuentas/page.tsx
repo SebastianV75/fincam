@@ -27,7 +27,7 @@ export default async function AccountsPage() {
 
   return (
     <AppShell
-      activeTab="cuentas"
+      activeTab="mas"
       title="Cuentas"
       subtitle="Tus saldos, ahorro y deuda reunidos en una sola vista clara."
       desktopSummary={{
