@@ -228,6 +228,8 @@ export async function getDashboardData() {
     upcomingPayments,
     accounts,
     rules,
+    recurringItems,
+    creditCards,
   };
 }
 
