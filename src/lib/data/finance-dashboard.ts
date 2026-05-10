@@ -163,12 +163,21 @@ async function getBaseFinanceData() {
   };
 }
 
+function resolveRuleAmount(rule: AllocationRuleRecord, incomeAmount: number) {
+  if (rule.rule_type === 'percentage') {
+    return (incomeAmount * normalizeNumber(rule.value)) / 100;
+  }
+
+  return normalizeNumber(rule.value);
+}
+
 export async function getDashboardData() {
   const { accounts, payPeriods, rules, recurringItems, creditCards } =
     await getBaseFinanceData();
 
   const currentPayPeriod = payPeriods[0] ?? null;
   const accountMap = new Map(accounts.map((account) => [account.id, account]));
+  const incomeAmount = normalizeNumber(currentPayPeriod?.income_amount);
 
   const availableBalance = currentPayPeriod
     ? normalizeNumber(currentPayPeriod.free_amount)
@@ -178,26 +187,16 @@ export async function getDashboardData() {
 
   const fixedExpensesAmount = rules
     .filter((rule) => rule.category === 'fixed_expense')
-    .reduce((sum, rule) => sum + normalizeNumber(rule.value), 0);
+    .reduce((sum, rule) => sum + resolveRuleAmount(rule, incomeAmount), 0);
 
   const creditCardAmount = rules
     .filter((rule) => rule.category === 'credit_card')
-    .reduce((sum, rule) => sum + normalizeNumber(rule.value), 0);
+    .reduce((sum, rule) => sum + resolveRuleAmount(rule, incomeAmount), 0);
 
   const savingsAmount = currentPayPeriod
     ? rules
         .filter((rule) => rule.category === 'savings')
-        .reduce((sum, rule) => {
-          if (rule.rule_type === 'percentage') {
-            return (
-              sum +
-              (normalizeNumber(currentPayPeriod.income_amount) * normalizeNumber(rule.value)) /
-                100
-            );
-          }
-
-          return sum + normalizeNumber(rule.value);
-        }, 0)
+        .reduce((sum, rule) => sum + resolveRuleAmount(rule, incomeAmount), 0)
     : 0;
 
   const upcomingPayments = [

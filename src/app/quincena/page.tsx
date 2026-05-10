@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { AllocationRulesManager } from '@/components/forms/allocation-rules-manager';
 import { AppShell } from '@/components/layout/app-shell';
 import { SectionCard } from '@/components/ui/section-card';
 import { getDashboardData } from '@/lib/data/finance-dashboard';
@@ -413,6 +414,15 @@ export default async function PayPeriodPage() {
           Estas reglas son las que sostienen el reparto cada vez que entra tu quincena.
         </p>
       </SectionCard>
+
+      <section className="rounded-[24px] border border-border-soft bg-surface p-5 shadow-[0_1px_2px_rgba(47,49,43,0.04),0_8px_24px_rgba(47,49,43,0.03)]">
+        <p className="text-base font-semibold text-foreground">Personaliza tu reparto</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-text-muted">
+          Aqui puedes decidir como dividir la quincena segun sus necesidades reales: que porcentaje se va a ahorro, cuanto se aparta para pagos fijos o cuanto quiere mandar a tarjeta.
+        </p>
+      </section>
+
+      <AllocationRulesManager rules={data.rules} />
     </AppShell>
   );
 }
