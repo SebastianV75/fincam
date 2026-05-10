@@ -18,6 +18,11 @@ const secondarySections = [
     href: '/recurrentes',
     description: 'Ten presentes tus pagos y apartados que vuelven cada semana, quincena o mes.',
   },
+  {
+    title: 'Movimientos',
+    href: '/movimientos',
+    description: 'Revisa, corrige o elimina capturas para mantener tu historial y saldos coherentes.',
+  },
 ] as const;
 
 export default function MorePage() {

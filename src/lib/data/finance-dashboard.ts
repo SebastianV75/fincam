@@ -315,3 +315,66 @@ export async function getRecurringPageData() {
     recurringItems,
   };
 }
+
+export type MovementCategoryRecord = {
+  id: string;
+  name: string;
+  kind: 'expense' | 'income' | 'transfer' | 'credit_payment';
+};
+
+export type MovementHistoryRecord = {
+  id: string;
+  user_id: string;
+  pay_period_id: string | null;
+  account_id: string | null;
+  destination_account_id: string | null;
+  type: 'expense' | 'income' | 'credit_payment' | 'transfer';
+  amount: number;
+  category_id: string | null;
+  note: string | null;
+  transaction_date: string;
+};
+
+export async function getMovementsPageData() {
+  const client = getInsforgeClient();
+
+  const [transactions, accounts, categories] = await Promise.all([
+    runQuery<MovementHistoryRecord>(
+      client.database
+        .from('transactions')
+        .select(
+          'id, user_id, pay_period_id, account_id, destination_account_id, type, amount, category_id, note, transaction_date'
+        )
+        .order('transaction_date', { ascending: false })
+    ),
+    runQuery<
+      AccountRecord & {
+        is_active: boolean;
+      }
+    >(
+      client.database
+        .from('accounts')
+        .select('id, name, type, current_balance, is_active')
+        .order('created_at', { ascending: true })
+    ),
+    runQuery<MovementCategoryRecord>(
+      client.database
+        .from('categories')
+        .select('id, name, kind')
+        .order('kind', { ascending: true })
+        .order('name', { ascending: true })
+    ),
+  ]);
+
+  return {
+    transactions: transactions.map((transaction) => ({
+      ...transaction,
+      amount: normalizeNumber(transaction.amount),
+    })),
+    accounts: accounts.map((account) => ({
+      ...account,
+      current_balance: normalizeNumber(account.current_balance),
+    })),
+    categories,
+  };
+}
